@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=no" />
+<title>AI-Driven Microsoft Stock Price Prediction</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #121212;
+    color: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+  }
+  #app {
+    background: #181818;
+    border-radius: 12px;
+    padding: 20px;
+    width: 350px;
+    max-width: 95vw;
+    box-shadow: 0 0 10px #0d47a1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  header {
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    color: #2196f3;
+  }
+  canvas {
+    border-radius: 8px;
+    background: #212121;
+  }
+  #controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  #predictDays {
+    width: 60px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    text-align: center;
+  }
+  button {
+    background: #2196f3;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-grow: 1;
+  }
+  button:hover {
+    background: #0d47a1;
+  }
+  #footer {
+    font-size: 0.8rem;
+    color: #777;
+    text-align: center;
+    margin-top: 4px;
+  }
+  @media (max-height: 600px) {
+    body, #app {
+      height: 100vh;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="app" role="main" aria-label="Microsoft Stock Price Prediction App">
+    <header>Cracking the Market Code<br>AI-Driven MSFT Stock Prediction</header>
+    <canvas id="stockChart" width="320" height="180" aria-label="Stock price chart"></canvas>
+    <div id="controls" aria-label="Prediction controls">
+      <label for="predictDays" style="color:#bbb;">Predict Days:</label>
+      <input type="number" id="predictDays" min="1" max="30" value="7" aria-describedby="predictDaysDesc"/>
+      <button id="predictBtn" aria-label="Run prediction for upcoming days">Predict</button>
+    </div>
+    <div id="footer">Data source: Kaggle Microsoft Stock Prices (2015-2021)</div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<script>
+  // Abridged MSFT stock closing prices (Date, Close) from Kaggle dataset 2015–2021, monthly samples for demo
+  const stockData = [
+    { date: '2015-01-02', close: 46.76 },
+    { date: '2015-02-02', close: 44.82 },
+    { date: '2015-03-02', close: 46.70 },
+    { date: '2015-04-01', close: 48.13 },
+    { date: '2015-05-01', close: 49.45 },
+    { date: '2015-06-01', close: 49.37 },
+    { date: '2015-07-01', close: 46.08 },
+    { date: '2015-08-03', close: 42.45 },
+    { date: '2015-09-01', close: 41.66 },
+    { date: '2015-10-01', close: 45.14 },
+    { date: '2015-11-02', close: 49.94 },
+    { date: '2015-12-01', close: 55.48 },
+    { date: '2016-01-04', close: 54.80 },
+    { date: '2016-02-01', close: 51.75 },
+    { date: '2016-03-01', close: 51.54 },
+    { date: '2016-04-01', close: 52.43 },
+    { date: '2016-05-02', close: 54.86 },
+    { date: '2016-06-01', close: 54.40 },
+    { date: '2016-07-01', close: 57.92 },
+    { date: '2016-08-01', close: 58.94 },
+    { date: '2016-09-01', close: 57.11 },
+    { date: '2016-10-03', close: 58.75 },
+    { date: '2016-11-01', close: 62.41 },
+    { date: '2016-12-01', close: 62.57 },
+    { date: '2017-01-03', close: 63.75 },
+    { date: '2017-02-01', close: 64.42 },
+    { date: '2017-03-01', close: 64.79 },
+    { date: '2017-04-03', close: 66.20 },
+    { date: '2017-05-01', close: 68.34 },
+    { date: '2017-06-01', close: 67.91 },
+    { date: '2017-07-03', close: 72.32 },
+    { date: '2017-08-01', close: 74.03 },
+    { date: '2017-09-01', close: 69.73 },
+    { date: '2017-10-02', close: 73.66 },
+    { date: '2017-11-01', close: 79.87 },
+    { date: '2017-12-01', close: 85.54 },
+    { date: '2018-01-02', close: 87.32 },
+    { date: '2018-02-01', close: 86.09 },
+    { date: '2018-03-01', close: 93.77 },
+    { date: '2018-04-02', close: 96.63 },
+    { date: '2018-05-01', close: 97.24 },
+    { date: '2018-06-01', close: 96.27 },
+    { date: '2018-07-02', close: 104.91 },
+    { date: '2018-08-01', close: 106.19 },
+    { date: '2018-09-04', close: 104.34 },
+    { date: '2018-10-01', close: 104.52 },
+    { date: '2018-11-01', close: 100.96 },
+    { date: '2018-12-03', close: 101.20 },
+    { date: '2019-01-02', close: 106.85 },
+    { date: '2019-02-01', close: 109.52 },
+    { date: '2019-03-01', close: 119.65 },
+    { date: '2019-04-01', close: 120.28 },
+    { date: '2019-05-01', close: 123.33 },
+    { date: '2019-06-03', close: 130.34 },
+    { date: '2019-07-01', close: 134.35 },
+    { date: '2019-08-01', close: 138.20 },
+    { date: '2019-09-03', close: 137.52 },
+    { date: '2019-10-01', close: 140.94 },
+    { date: '2019-11-01', close: 146.05 },
+    { date: '2019-12-02', close: 157.70 },
+    { date: '2020-01-02', close: 160.62 },
+    { date: '2020-02-03', close: 170.23 },
+    { date: '2020-03-02', close: 150.62 },
+    { date: '2020-04-01', close: 174.72 },
+    { date: '2020-05-01', close: 183.99 },
+    { date: '2020-06-01', close: 194.12 },
+    { date: '2020-07-01', close: 205.68 },
+    { date: '2020-08-03', close: 225.28 },
+    { date: '2020-09-01', close: 207.03 },
+    { date: '2020-10-01', close: 210.33 },
+    { date: '2020-11-02', close: 214.18 },
+    { date: '2020-12-01', close: 221.68 },
+    { date: '2021-01-04', close: 222.42 },
+    { date: '2021-02-01', close: 239.65 },
+    { date: '2021-03-01', close: 236.94 },
+    { date: '2021-04-01', close: 252.18 }
+  ];
+
+  // Utility to parse date string to Date object
+  function parseDate(dateStr) {
+    return new Date(dateStr);
+  }
+
+  // Prepare data for Chart.js: arrays of dates and close prices
+  const labels = stockData.map(d => d.date);
+  const closePrices = stockData.map(d => d.close);
+
+  // Chart.js configuration for stock price and prediction
+  const ctx = document.getElementById('stockChart').getContext('2d');
+
+  // Initial empty prediction set
+  let predictionData = [];
+
+  // Utility: Simple linear regression to predict next N days based on historical close prices
+  // This model fits y = m*x + b over indices and predicts future indices
+  function linearRegressionPredict(closePrices, predictDays) {
+    const n = closePrices.length;
+    if(n < 2) return [];
+    // x values: 0 .. n-1
+    // y values: closePrices
+    let sumX=0, sumY=0, sumXY=0, sumXX=0;
+    for(let i=0; i<n; i++){
+      sumX += i;
+      sumY += closePrices[i];
+      sumXY += i*closePrices[i];
+      sumXX += i*i;
+    }
+    const m = (n*sumXY - sumX*sumY) / (n*sumXX - sumX*sumX);
+    const b = (sumY - m*sumX)/n;
+
+    let preds = [];
+    for(let i=1; i<=predictDays; i++) {
+      const x = n + i - 1;
+      preds.push(m*x + b);
+    }
+    return preds;
+  }
+
+  // Utility: generate next dates with monthly step after last date in dataset
+  function generateNextDates(lastDateStr, count) {
+    const dates = [];
+    const lastDate = parseDate(lastDateStr);
+    let year = lastDate.getFullYear();
+    let month = lastDate.getMonth()+1; // 0-based to 1-based
+
+    for(let i=0; i<count; i++){
+      month++;
+      if(month>12){
+        month=1;
+        year++;
+      }
+      const mStr = month.toString().padStart(2,'0');
+      const dateStr = `${year}-${mStr}-01`;
+      dates.push(dateStr);
+    }
+    return dates;
+  }
+
+  // Global chart instance
+  let stockChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'MSFT Close Price',
+          data: closePrices,
+          borderColor: '#2196f3',
+          backgroundColor: 'rgba(33,150,243,0.3)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          borderWidth: 2,
+          hoverRadius: 5,
+        },
+        {
+          label: 'Predicted Price',
+          data: [],
+          borderColor: '#ff9800',
+          backgroundColor: 'rgba(255,152,0,0.3)',
+          fill: true,
+          tension: 0.3,
+          borderDash: [8,4],
+          pointRadius: 3,
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {duration: 600},
+      scales: {
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            maxTicksLimit: 6,
+            color: '#ddd'
+          },
+          grid: {color: '#333'}
+        },
+        y: {
+          beginAtZero: false,
+          ticks: {color: '#ddd'},
+          grid: {color: '#333'}
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {color: '#eee', font: {weight: 'bold'}}
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          backgroundColor: '#222',
+          titleColor: '#2196f3',
+          bodyColor: '#fff',
+          cornerRadius: 6,
+          displayColors: true,
+        }
+      },
+      interaction: {
+        mode: 'nearest',
+        intersect: false
+      }
+    }
+  });
+
+  // Function to run prediction and update chart
+  function runPrediction() {
+    const predictDaysInput = document.getElementById('predictDays');
+    let predictDays = parseInt(predictDaysInput.value);
+    if(isNaN(predictDays) || predictDays < 1) predictDays = 7;
+    if(predictDays > 30) predictDays = 30;
+    predictDaysInput.value = predictDays;
+
+    // Get prediction using linear regression on close prices
+    const preds = linearRegressionPredict(closePrices, predictDays);
+
+    // Generate future dates
+    const futureDates = generateNextDates(labels[labels.length-1], predictDays);
+
+    // Build full predicted dataset aligned with chart labels
+    const newLabels = labels.concat(futureDates);
+    const predictedPrices = new Array(labels.length - 1).fill(null); // for alignment
+    predictedPrices.push(closePrices[closePrices.length - 1]); // anchor last known price
+    for(let p of preds) predictedPrices.push(p);
+
+    // Update chart data
+    stockChart.data.labels = newLabels;
+    stockChart.data.datasets[0].data = closePrices.concat(new Array(predictDays).fill(null));
+    stockChart.data.datasets[1].data = predictedPrices;
+
+    stockChart.update();
+  }
+
+  // Initial prediction run on page load
+  runPrediction();
+
+  // Bind button click event
+  document.getElementById('predictBtn').addEventListener('click', runPrediction);
+
+  // Accessibility: describe predictDays input
+  document.getElementById('predictDays').setAttribute('aria-describedby', 'predictDays-desc');
+</script>
+</body>
+</html>
+</content>
+</create_file>
