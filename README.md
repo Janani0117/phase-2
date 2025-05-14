@@ -1,73 +1,45 @@
-# 🧠 Cracking the Market Code: AI-Driven Stock Price Prediction Using Time Series Analysis
+# AI-Powered Movie Recommendations
 
-This project explores the use of AI and time series analysis techniques to predict stock prices. Leveraging historical market data and sentiment analysis, it demonstrates how machine learning models can provide insights into future price movements.
+This project is an AI-based recommendation system that suggests movies to users based on their preferences. It uses machine learning and content-based filtering to generate recommendations.
 
-## 📈 Project Overview
+## Features
+- Recommend movies based on genres, ratings, and descriptions
+- Content-based recommendation using TF-IDF
+- Simple web interface via Flask
 
-The stock market is influenced by numerous factors—some deterministic, others unpredictable. This repository provides a practical approach to forecasting stock prices using:
-- Historical stock price data
-- Technical indicators (e.g., Moving Averages, RSI)
-- Sentiment scores derived from market news or social media
-- AI models like LSTM (Long Short-Term Memory) or ARIMA
+## Setup Instructions
 
-## 📁 Files Included
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/ai-movie-recommender.git
+   cd ai-movie-recommender
+   ```
 
-| File | Description |
-|------|-------------|
-| `ai_stock_prediction_data.csv` | Sample dataset containing historical stock prices with sentiment and technical indicators |
-| `notebook.ipynb` (optional) | Jupyter notebook for data preprocessing, model training, and evaluation |
-| `model.py` (optional) | Python script to train and evaluate an LSTM model |
-| `README.md` | Project documentation |
-| `requirements.txt` | List of dependencies for the project |
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## 📊 Dataset Description
+3. Run the app:
+   ```bash
+   python app.py
+   ```
 
-The CSV file includes the following columns:
-- `Date`: Trading date
-- `Open`, `High`, `Low`, `Close`: Stock prices
-- `Volume`: Trading volume
-- `SentimentScore`: NLP-based sentiment analysis score
-- `MovingAvg_5d`: 5-day moving average of the closing price
-- `RSI_14d`: 14-day Relative Strength Index
+4. Open the browser at `http://localhost:5000`
 
-## 🧪 Methodology
+## Dataset
 
-1. **Data Preprocessing**
-   - Normalization and handling missing values
-   - Feature engineering with technical indicators
+The project uses a sample `movies.csv` file that contains movie titles, genres, and descriptions.
 
-2. **Modeling**
-   - Time series forecasting using LSTM or traditional models like ARIMA
-   - Optionally incorporate sentiment data for hybrid modeling
+## Example
 
-3. **Evaluation**
-   - Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and visualization of predictions
+Input: `"I liked Inception and Interstellar"`
 
-## 🛠 Setup
+Output: 
+- "The Matrix"
+- "Arrival"
+- "Tenet"
 
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+## License
 
-# Install dependencies
-pip install -r requirements.txt
-```
-
-## ✅ Goals
-
-- Predict short-term stock price movements
-- Integrate technical and sentiment-based features
-- Visualize trends and evaluate model accuracy
-
-## 📌 Future Work
-
-- Deploy as a web app using Streamlit or Flask
-- Incorporate real-time sentiment from news APIs or social media
-- Train with more diverse stock datasets
-
-## 🧑‍💻 Author
-
-[Your Name]  
-[Your GitHub Profile]  
-[Your LinkedIn or Website]
+MIT License
